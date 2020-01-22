@@ -16,7 +16,7 @@ var MAP_PIN_HEIGHT = 70;
 function getRandomNumber (minNumber, maxNumber) {
 
   return minNumber + Math.floor(Math.random() * (maxNumber + 1 - minNumber));
-};
+}
 
 // функция формирования случайного ряда чисел, указанной длины из заданного диапазона
 function getRandomRange (firstNumber, sizeRange) {
@@ -60,18 +60,6 @@ var startX = Math.floor((document.documentElement.clientWidth - mapOverlay.offse
 
 var endX = startX + mapOverlay.offsetWidth;
 
-// function beginX() {
-//   var userMap = document.querySelector('.map');
-//   var mapOverlay = userMap.querySelector('.map__overlay');
-//   return Math.floor((document.documentElement.clientWidth - mapOverlay.offsetWidth) / 2);
-// }
-
-// function stopX() {
-//   var userMap = document.querySelector('.map');
-//   var mapOverlay = userMap.querySelector('.map__overlay');
-//   return (Math.floor((document.documentElement.clientWidth - mapOverlay.offsetWidth) / 2) + mapOverlay.offsetWidth);
-// }
-
 // 1. Создаем массив, состоящий из 8 сгенерированных JS объектов, которые будут описывать похожие объявления неподалёку.
 var rangeRandomElements = getRandomRange(0, 8);
 var proposal = {};
@@ -106,26 +94,10 @@ for (var i = 0; i < 8; i++) {
   arrProposals[i] = proposal;
 }
 
-//   "location": {
-//     «x»: случайное число, координата x метки на карте. Значение ограничено размерами блока, в котором перетаскивается метка.
-//     «y»: случайное число, координата y метки на карте от 130 до 630.
-//   }
-// }
-
 // 2. У блока .map уберите класс .map--faded.
-
 userMap.classList.remove('map--faded');
 
 // 3. На основе данных, созданных в первом пункте, создайте DOM-элементы, соответствующие меткам на карте, и заполните их данными из массива. Итоговую разметку метки .map__pin можно взять из шаблона #pin.
-
-// У метки должны быть следующие данные:
-// Координаты:style="left: {{location.x}}px; top: {{location.y}}px;"
-// src="{{author.avatar}}"
-// alt="{{заголовок объявления}}"
-// Обратите внимание
-
-// Координаты X и Y, которые вы вставите в разметку, это не координаты левого верхнего угла блока метки, а координаты, на которые указывает метка своим острым концом. Чтобы найти эту координату нужно учесть размеры элемента с меткой.
-
 var renderPin = function(proposal) {
   var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
   var newPin = templatePin.cloneNode(true);
@@ -140,7 +112,6 @@ var renderPin = function(proposal) {
 };
 
 // 4. Отрисуйте сгенерированные DOM-элементы в блок .map__pins. Для вставки элементов используйте DocumentFragment.
-
 var mapPinsBlock = document.querySelector('.map__pins');
 
 var greateFragmentElements = function(arrProposals) {
@@ -157,7 +128,6 @@ var greateFragmentElements = function(arrProposals) {
 mapPinsBlock.appendChild(greateFragmentElements(arrProposals));
 
 // 5. На основе первого по порядку элемента из сгенерированного массива и шаблона #card создайте DOM-элемент объявления, заполните его данными из объекта и вставьте полученный DOM-элемент в блок .map перед блоком.map__filters-container:
-
 var textRooms = function(elementRooms) {
   var text;
 
@@ -248,11 +218,8 @@ var renderCard = function(element) {
   newCard.querySelector('.popup__description').textContent = element.offer.description;
   newCard.querySelector('.popup__avatar').src = element.author.avatar;
 
-  // В список .popup__features выведите все доступные удобства в объявлении.
   removeElement(popupFeatures, listFeatures, checkFeature(listFeatures, element));
 
-
-  // В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
   if (arrImgPhotos.length < sumSrcPhotos && arrImgPhotos.length == 1) {
 
     for (var i = 0; i < sumSrcPhotos - arrImgPhotos.length; i++) {
