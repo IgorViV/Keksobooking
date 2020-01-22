@@ -2,14 +2,19 @@
 
 var TITLES_OFFER = ["Большая уютная квартира", "Маленькая неуютная квартира", "Огромный прекрасный дворец", "Маленький ужасный дворец", "Красивый гостевой домик", "Некрасивый негостеприимный домик", "Уютное бунгало далеко от моря", "Неуютное бунгало по колено в воде"];
 var TYPES_OFFER = ["palace", "flat", "house", "bungalo"];
+var TYPES_OFFER_TRANSLATE = {palace : "Дворец", flat : "Квартира", house : "Дом", bungalo : "Бунгало"};
 var CHECKIN_OFFER = ["12:00", "13:00", "14:00"];
 var CHECKOUT_OFFER = ["12:00", "13:00", "14:00"];
 var FEATURES_OFFER = ["wifi", "dishwasher", "parking", "washer", "elevator", "conditioner"];
+var FEATURES_OFFER_TRANSLATE = {wifi : "wifi", dishwasher : "посудомойка", parking : "паркинг", washer : "стиральная машина", elevator : "лифт", conditioner : "кондиционер"};
 var PHOTOS_OFFER = ["http://o0.github.io/assets/images/tokyo/hotel1.jpg", "http://o0.github.io/assets/images/tokyo/hotel2.jpg", "http://o0.github.io/assets/images/tokyo/hotel3.jpg"];
 var arrProposals = [];
+var MAP_PIN_WITH = 50;
+var MAP_PIN_HEIGHT = 70;
 
 // функция выборки случайного числа из заданного диапазона
 function getRandomNumber (minNumber, maxNumber) {
+
   return minNumber + Math.floor(Math.random() * (maxNumber + 1 - minNumber));
 };
 
@@ -18,6 +23,7 @@ function getRandomRange (firstNumber, sizeRange) {
   var arrTempNumbers = [];
   var temp = firstNumber;
   var arrNumbers = [];
+
     for (var i = 0; i < sizeRange; i++) {
       arrTempNumbers[i] = temp;
       ++temp;
@@ -25,6 +31,7 @@ function getRandomRange (firstNumber, sizeRange) {
 
     for (var j = 0; j < sizeRange; j++) {
       var indexArr = getRandomNumber(0, arrTempNumbers.length - 1);
+
       arrNumbers[j] = arrTempNumbers[indexArr];
       arrTempNumbers.splice(indexArr, 1);
     }
@@ -36,45 +43,68 @@ function getRandomRange (firstNumber, sizeRange) {
 function getArrayRandomElement(arrFirsts) {
   var arrLasts = [];
   var arrTemps = [];
+
   arrTemps = getRandomRange (0, arrFirsts.length);
+
   for (var i = 0; i < arrFirsts.length; i++) {
     arrLasts[i] = arrFirsts[arrTemps[i]];
   }
+
   return arrLasts;
 }
 
+// Вычисляем случайную координату Х метки на карте
+var userMap = document.querySelector('.map');
+var mapOverlay = userMap.querySelector('.map__overlay');
+var startX = Math.floor((document.documentElement.clientWidth - mapOverlay.offsetWidth) / 2);
+
+var endX = startX + mapOverlay.offsetWidth;
+
+// function beginX() {
+//   var userMap = document.querySelector('.map');
+//   var mapOverlay = userMap.querySelector('.map__overlay');
+//   return Math.floor((document.documentElement.clientWidth - mapOverlay.offsetWidth) / 2);
+// }
+
+// function stopX() {
+//   var userMap = document.querySelector('.map');
+//   var mapOverlay = userMap.querySelector('.map__overlay');
+//   return (Math.floor((document.documentElement.clientWidth - mapOverlay.offsetWidth) / 2) + mapOverlay.offsetWidth);
+// }
+
 // 1. Создаем массив, состоящий из 8 сгенерированных JS объектов, которые будут описывать похожие объявления неподалёку.
-var rangeRandomElements = getRandomRange(1, 8);
+var rangeRandomElements = getRandomRange(0, 8);
 var proposal = {};
 
 for (var i = 0; i < 8; i++) {
+  var locationX = getRandomNumber(MAP_PIN_WITH / 2, (endX - startX - MAP_PIN_WITH / 2));
+  var locationY = getRandomNumber((130 + MAP_PIN_HEIGHT), (630 - MAP_PIN_HEIGHT));
+
   proposal = {
     author: {
-      avatar: "img/avatars/user0" + rangeRandomElements[i] + ".png"
+      avatar: "img/avatars/user0" + (rangeRandomElements[i] + 1) + ".png"
     },
     offer: {
       title: TITLES_OFFER[rangeRandomElements[i]],
-      addres: "600, 350",
+      address: locationX + ", " + locationY,
       price: getRandomNumber(1000, 1000000),
-      type: TYPES_OFFER[getRandomNumber(0, TYPES_OFFER.length)],
+      type: TYPES_OFFER[getRandomNumber(0, TYPES_OFFER.length - 1)],
       rooms: getRandomNumber(1, 5),
       guests: getRandomNumber(1, 5),
-      checkin: CHECKIN_OFFER[getRandomNumber(0, CHECKIN_OFFER.length)],
-      checkout: CHECKOUT_OFFER[getRandomNumber(0, CHECKIN_OFFER.length)],
+      checkin: CHECKIN_OFFER[getRandomNumber(0, CHECKIN_OFFER.length - 1)],
+      checkout: CHECKOUT_OFFER[getRandomNumber(0, CHECKOUT_OFFER.length - 1)],
       features: FEATURES_OFFER.slice(0, getRandomNumber(0, FEATURES_OFFER.length - 1) + 1),
       description: " ",
       photos: getArrayRandomElement(PHOTOS_OFFER)
     },
     location: {
-      x: getRandomNumber(130, 630),
-      y: getRandomNumber(130, 630)
+      x: locationX,
+      y: locationY
     }
   };
+
   arrProposals[i] = proposal;
-};
-
-console.log(arrProposals);
-
+}
 
 //   "location": {
 //     «x»: случайное число, координата x метки на карте. Значение ограничено размерами блока, в котором перетаскивается метка.
@@ -82,10 +112,9 @@ console.log(arrProposals);
 //   }
 // }
 
-
 // 2. У блока .map уберите класс .map--faded.
 
-// Это временное решение, этот класс переключает карту из неактивного состояния в активное. В последующих заданиях, в соответствии с ТЗ вы будете переключать режимы страницы: неактивный, в котором карта и обе формы заблокированы и активный режим, в котором производится ввод данных и просмотр похожих объявлений. Сейчас, для тестирования функции генерации похожих объявлений мы временно сымитируем активный режим, а в последующих разделах запрограммируем его полностью.
+userMap.classList.remove('map--faded');
 
 // 3. На основе данных, созданных в первом пункте, создайте DOM-элементы, соответствующие меткам на карте, и заполните их данными из массива. Итоговую разметку метки .map__pin можно взять из шаблона #pin.
 
@@ -97,20 +126,149 @@ console.log(arrProposals);
 
 // Координаты X и Y, которые вы вставите в разметку, это не координаты левого верхнего угла блока метки, а координаты, на которые указывает метка своим острым концом. Чтобы найти эту координату нужно учесть размеры элемента с меткой.
 
+var renderPin = function(proposal) {
+  var templatePin = document.querySelector('#pin').content.querySelector('.map__pin');
+  var newPin = templatePin.cloneNode(true);
+  var pinImg = newPin.querySelector('img');
+
+  newPin.style.left = proposal.location.x + 'px';
+  newPin.style.top = proposal.location.y + 'px';
+  pinImg.src = proposal.author.avatar;
+  pinImg.alt = proposal.offer.title;
+
+  return newPin;
+};
+
 // 4. Отрисуйте сгенерированные DOM-элементы в блок .map__pins. Для вставки элементов используйте DocumentFragment.
+
+var mapPinsBlock = document.querySelector('.map__pins');
+
+var greateFragmentElements = function(arrProposals) {
+  var fragment = document.createDocumentFragment();
+
+  for (var i = 0; i < arrProposals.length; i++) {
+    fragment.appendChild(renderPin(arrProposals[i]));
+  }
+
+  return fragment;
+};
+
+
+mapPinsBlock.appendChild(greateFragmentElements(arrProposals));
 
 // 5. На основе первого по порядку элемента из сгенерированного массива и шаблона #card создайте DOM-элемент объявления, заполните его данными из объекта и вставьте полученный DOM-элемент в блок .map перед блоком.map__filters-container:
 
-// Выведите заголовок объявления offer.title в заголовок .popup__title.
-// Выведите адрес offer.address в блок .popup__text--address.
-// Выведите цену offer.price в блок .popup__text--price строкой вида {{offer.price}}₽/ночь. Например, 5200₽/ночь.
-// В блок .popup__type выведите тип жилья offer.type: Квартира для flat, Бунгало для bungalo, Дом для house, Дворец для palace.
-// Выведите количество гостей и комнат offer.rooms и offer.guests в блок .popup__text--capacity строкой вида {{offer.rooms}} комнаты для {{offer.guests}} гостей. Например, 2 комнаты для 3 гостей.
-// Время заезда и выезда offer.checkin и offer.checkout в блок .popup__text--time строкой вида Заезд после {{offer.checkin}}, выезд до {{offer.checkout}}. Например, заезд после 14:00, выезд до 12:00.
-// В список .popup__features выведите все доступные удобства в объявлении.
-// В блок .popup__description выведите описание объекта недвижимости offer.description.
-// В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
-// Замените src у аватарки пользователя — изображения, которое записано в .popup__avatar — на значения поля author.avatar отрисовываемого объекта.
+var textRooms = function(elementRooms) {
+  var text;
+
+  switch (elementRooms) {
+    case 1 :
+      text = " комната";
+      break;
+    case 5 :
+      text = " комнат";
+      break;
+    default :
+      text = " комнаты";
+      break;
+  }
+
+  return elementRooms + text;
+};
+
+var textGuests = function(elementGuests) {
+  var text;
+
+  switch (elementGuests) {
+    case 1 :
+      text = " гостя.";
+      break;
+    default :
+      text = " гостей.";
+      break;
+  }
+
+  return elementGuests + text;
+};
+
+var checkFeature = function(listFeatures, element) {
+  var arrIndexDeleteElement = [];
+  for (var i = 0; i < listFeatures.length; i++) {
+    var check = false;
+
+    for (var j = 0; j < element.offer.features.length; j++) {
+      if (listFeatures[i].classList.contains('popup__feature--' + element.offer.features[j])) {
+        check = true;
+        continue;
+      }
+    }
+
+    if (!check) {
+      arrIndexDeleteElement.push(i);
+    }
+  }
+
+  if (arrIndexDeleteElement.length) {
+
+    return arrIndexDeleteElement;
+  }
+};
+
+var removeElement = function (block, arrElements, arrNumbersElements) {
+
+  arrNumbersElements.forEach( function(elem) {
+    block.removeChild(arrElements[elem]);
+  });
+
+};
+
+var addMissingElement = function(block, element) {
+  block.appendChild(element.cloneNode());
+};
+
+var addSrc = function (imgElement, imgSrc) {
+  imgElement.src = imgSrc;
+};
+
+var renderCard = function(element) {
+  var templateCard = document.querySelector('#card').content.querySelector('.map__card');
+  var newCard = templateCard.cloneNode(true);
+  var popupFeatures = newCard.querySelector('.popup__features');
+  var listFeatures = popupFeatures.querySelectorAll('.popup__feature');
+  var popupPhotos = newCard.querySelector('.popup__photos');
+  var arrImgPhotos = popupPhotos.querySelectorAll('.popup__photo');
+  var sumSrcPhotos = element.offer.photos.length;
+
+  newCard.querySelector('.popup__title').textContent = element.offer.title;
+  newCard.querySelector('.popup__text--address').textContent = element.offer.address;
+  newCard.querySelector('.popup__text--price').textContent = element.offer.price + '₽/ночь';
+  newCard.querySelector('.popup__type').textContent = TYPES_OFFER_TRANSLATE[element.offer.type];
+  newCard.querySelector('.popup__text--capacity').textContent = textRooms(element.offer.rooms) + " для " + textGuests(element.offer.guests);
+  newCard.querySelector('.popup__text--time').textContent = "заезд после " + element.offer.checkin + ", выезд до " + element.offer.checkout + ".";
+  newCard.querySelector('.popup__description').textContent = element.offer.description;
+  newCard.querySelector('.popup__avatar').src = element.author.avatar;
+
+  // В список .popup__features выведите все доступные удобства в объявлении.
+  removeElement(popupFeatures, listFeatures, checkFeature(listFeatures, element));
 
 
-// Стоит отдельно объявить функцию генерации случайных данных, функцию создания DOM-элемента на основе JS-объекта, функцию заполнения блока DOM-элементами на основе массива JS-объектов. Пункты задания примерно соответствуют функциям, которые вы должны создать.
+  // В блок .popup__photos выведите все фотографии из списка offer.photos. Каждая из строк массива photos должна записываться как src соответствующего изображения.
+  if (arrImgPhotos.length < sumSrcPhotos && arrImgPhotos.length == 1) {
+
+    for (var i = 0; i < sumSrcPhotos - arrImgPhotos.length; i++) {
+      addMissingElement(popupPhotos, arrImgPhotos[0]);
+    }
+
+    arrImgPhotos = popupPhotos.querySelectorAll('.popup__photo');
+
+    for (var j = 0; j < arrImgPhotos.length; j++) {
+      addSrc(arrImgPhotos[j], element.offer.photos[j]);
+    }
+  }
+
+  return newCard;
+};
+
+userMap.insertBefore(renderCard(arrProposals[0]), userMap.querySelector('.map__filters-container'));
+
+
