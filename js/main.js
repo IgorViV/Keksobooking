@@ -163,8 +163,11 @@ var textGuests = function(elementGuests) {
 
 var checkFeature = function(listFeatures, element) {
   var arrIndexDeleteElement = [];
+
   for (var i = 0; i < listFeatures.length; i++) {
     var check = false;
+
+
 
     for (var j = 0; j < element.offer.features.length; j++) {
       if (listFeatures[i].classList.contains('popup__feature--' + element.offer.features[j])) {
@@ -178,18 +181,16 @@ var checkFeature = function(listFeatures, element) {
     }
   }
 
-  if (arrIndexDeleteElement.length) {
+  return arrIndexDeleteElement;
 
-    return arrIndexDeleteElement;
-  }
 };
 
 var removeElement = function (block, arrElements, arrNumbersElements) {
-
-  arrNumbersElements.forEach( function(elem) {
-    block.removeChild(arrElements[elem]);
-  });
-
+  if (arrNumbersElements.length) {
+    arrNumbersElements.forEach( function(elem) {
+      block.removeChild(arrElements[elem]);
+    });
+  }
 };
 
 var addMissingElement = function(block, element) {
